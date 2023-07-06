@@ -2,6 +2,7 @@ package moisture_sensor
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/jhawk7/go-pi-irrigation/pkg/common"
 
@@ -21,8 +22,8 @@ import (
 const (
 	i2cBus       string  = "1"   // /i2c/dev/1 channel of ADC connected via i2c
 	i2cAddr      uint16  = 0x49  // I2C address of the ADC device
-	airVoltage   float32 = 50000 //voltage reading of sensor in air
-	waterVoltage float32 = 20500 //voltage reading of sensor in water
+	airVoltage   float32 = 5868  //voltage reading of sensor in air
+	waterVoltage float32 = 13560 //voltage reading of sensor in water
 
 	Channel0 ads1x15.Channel = ads1x15.Channel0
 	Channel1 ads1x15.Channel = ads1x15.Channel1
@@ -89,6 +90,7 @@ func (moistureSensor *ADCMoistureSensor) ReadMoistureValue(channel ads1x15.Chann
 	}
 	rawReading := readSample.Raw
 	moisturePercentage = mapReading(rawReading)
+	time.Sleep(time.Millisecond * 500) //wait time between channel reads
 	return
 }
 
@@ -111,7 +113,7 @@ func (moistureSensor *ADCMoistureSensor) getPin(channel ads1x15.Channel, freq ph
 	if p, pinExists := moistureSensor.cache[key]; pinExists {
 		pin = p
 	} else {
-		p, pinErr := moistureSensor.ADC.PinForChannel(channel, 5*physic.Volt, freq, ads1x15.BestQuality)
+		p, pinErr := moistureSensor.ADC.PinForChannel(channel, 5*physic.Volt, freq, ads1x15.SaveEnergy)
 		if pinErr != nil {
 			err = fmt.Errorf("failed create pin for channel; %v", pinErr)
 			return

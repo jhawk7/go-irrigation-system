@@ -119,6 +119,7 @@ func (moistureSensor *ADCMoistureSensor) getPin(channel ads1x15.Channel, freq ph
 			return
 		}
 		moistureSensor.cache[key] = p
+		common.LogInfo(fmt.Sprintf("caching mSensor pin for key: %v", key))
 		pin = p
 	}
 	return

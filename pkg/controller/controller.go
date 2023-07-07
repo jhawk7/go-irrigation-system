@@ -1,11 +1,13 @@
 package controller
 
 import (
+	"fmt"
+	"time"
+
 	"github.com/jhawk7/go-pi-irrigation/pkg/common"
 	"github.com/jhawk7/go-pi-irrigation/pkg/moisture_sensor"
 	"github.com/jhawk7/go-pi-irrigation/pkg/water_pump"
 	"periph.io/x/devices/v3/ads1x15"
-	"time"
 )
 
 type Controller struct {
@@ -26,6 +28,7 @@ func (c *Controller) CheckMoistureLv() {
 	c.LatestReading = reading
 	if c.LatestReading <= float32(c.Threshold) {
 		c.NeedsWater = true
+		common.LogInfo(fmt.Sprintf("%v needs water; [reading: %v]", c.Name, c.LatestReading))
 	}
 
 	for c.NeedsWater {
@@ -37,6 +40,8 @@ func (c *Controller) CheckMoistureLv() {
 			c.NeedsWater = false
 		}
 	}
+
+	common.LogInfo(fmt.Sprintf("%v latest reading: %v", c.Name, c.LatestReading))
 }
 
 // This function will be called repeatedly in a go routine
@@ -56,6 +61,7 @@ func (c *Controller) PollMoistureLv() {
 }
 
 func (c *Controller) PumpWater() {
+	common.LogInfo(fmt.Sprintf("pumping water for %v", c.Name))
 	c.Pump.Release()
 	time.Sleep(3 * time.Second)
 }

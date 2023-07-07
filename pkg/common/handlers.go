@@ -13,3 +13,7 @@ func ErrorHandler(err error, fatal bool) {
 		}
 	}
 }
+
+func LogInfo(info string) {
+	log.Info(info)
+}

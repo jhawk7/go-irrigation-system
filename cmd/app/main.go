@@ -77,8 +77,8 @@ func main() {
 	}()
 
 	// Continuously update latest moisture reading
-	go plantController1.PollMoistureLv()
-	go plantController2.PollMoistureLv()
+	// go plantController1.PollMoistureLv()
+	// go plantController2.PollMoistureLv()
 	go gaugeMoistureLevel()
 
 	for {
@@ -100,7 +100,7 @@ var moistureCallback = func(ctx context.Context, result metric.Float64ObserverRe
 	//moistureReading1, moistureReading2 := readMoistureLevel()
 	result.Observe(float64(plantController1.LatestReading), attribute.String("read.type", "percentage"), attribute.String("controller.name", plantController1.Name))
 	result.Observe(float64(plantController2.LatestReading), attribute.String("read.type", "percentage"), attribute.String("controller.name", plantController2.Name))
-	time.Sleep(time.Minute)
+	time.Sleep(time.Hour)
 }
 
 // func readMoistureLevel() (float64, float64) {

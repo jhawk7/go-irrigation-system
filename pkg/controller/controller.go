@@ -20,6 +20,10 @@ type Controller struct {
 }
 
 func (c *Controller) CheckMoistureLv() {
+	reading, readErr := c.Msensor.ReadMoistureValue(c.Channel)
+	common.ErrorHandler(readErr, false)
+
+	c.LatestReading = reading
 	if c.LatestReading <= float32(c.Threshold) {
 		c.NeedsWater = true
 	}

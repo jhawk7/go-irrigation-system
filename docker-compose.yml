@@ -2,8 +2,6 @@ services:
   go-pi-irrigation:
     build: .
     image: jhawk7/go-pi-irrigation
-    ports: 
-      - "8080:8080"
     restart: always
     env_file:
       - .env

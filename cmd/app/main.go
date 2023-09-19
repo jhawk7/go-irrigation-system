@@ -23,7 +23,7 @@ var plantController2 *controller.Controller
 
 func initTelemetry() {
 	otlpErr := opentel.InitOpentelProviders
-	common.ErrorHandler(fmt.Errorf("failed to init otlp providers; [error: %v]", otlpErr()), true)
+	common.ErrorHandler(fmt.Errorf("failed to init otlp providers; [error: %v]", otlpErr().Error()), true)
 }
 
 func main() {

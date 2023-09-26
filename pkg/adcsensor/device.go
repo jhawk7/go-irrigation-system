@@ -81,7 +81,7 @@ func (sensor *ADCSensor) ReadMoistureValue(channel ads1x15.Channel) (moisturePer
 		err = pinErr
 		return
 	}
-	defer pin.Halt() // doesn't close pin
+	//defer pin.Halt() // doesn't close pin
 
 	readSample, readErr := pin.Read()
 	if readErr != nil {

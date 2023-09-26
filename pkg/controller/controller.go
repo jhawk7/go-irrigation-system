@@ -28,11 +28,11 @@ func (c *Controller) CheckMoistureLv() {
 	c.LatestReading = reading
 	if c.LatestReading <= float32(c.Threshold) {
 		c.NeedsWater = true
-		common.LogInfo(fmt.Sprintf("%v needs water [reading: %v]", c.Name, c.LatestReading))
+		common.LogInfo(fmt.Sprintf("%v needs water [reading: %.2f%%]", c.Name, c.LatestReading))
 		c.PumpWater()
 	}
 
-	common.LogInfo(fmt.Sprintf("%v latest reading: %v", c.Name, c.LatestReading))
+	common.LogInfo(fmt.Sprintf("%v latest reading: %.2f%%", c.Name, c.LatestReading))
 }
 
 func (c *Controller) PumpWater() {

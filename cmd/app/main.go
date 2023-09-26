@@ -20,8 +20,8 @@ const (
 	meterName         = "rpi-irrigation"
 	waterPump1        = 24
 	waterPump2        = 15
-	idealMoisture     = 90
-	moistureThreshold = 22
+	idealMoisture     = float32(90)
+	moistureThreshold = float32(22)
 )
 
 var plantController1 *controller.Controller
@@ -85,7 +85,7 @@ func main() {
 	// Continuously update latest moisture reading
 	// go plantController1.PollMoistureLv()
 	// go plantController2.PollMoistureLv()
-	go gaugeMoistureLevel()
+	//go gaugeMoistureLevel()
 
 	for {
 		plantController1.CheckMoistureLv()

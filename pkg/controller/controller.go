@@ -14,7 +14,7 @@ type Controller struct {
 	Pump                    *pump.WaterPumpRelay
 	ADCSensor               *adcsensor.ADCSensor
 	IdealMoisturePercentage float32
-	Threshold               int
+	Threshold               float32
 	Name                    string
 	NeedsWater              bool
 	LatestReading           float32
@@ -29,13 +29,13 @@ func (c *Controller) CheckMoistureLv() {
 	if c.LatestReading <= float32(c.Threshold) {
 		c.NeedsWater = true
 		common.LogInfo(fmt.Sprintf("%v needs water [reading: %.2f%%]", c.Name, c.LatestReading))
-		c.PumpWater()
+		c.pumpWater()
 	}
 
 	common.LogInfo(fmt.Sprintf("%v latest reading: %.2f%%", c.Name, c.LatestReading))
 }
 
-func (c *Controller) PumpWater() {
+func (c *Controller) pumpWater() {
 	for c.LatestReading < float32(c.IdealMoisturePercentage) {
 		common.LogInfo(fmt.Sprintf("pumping water for %v", c.Name))
 		c.Pump.Release()

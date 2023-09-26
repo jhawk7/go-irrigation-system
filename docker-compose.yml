@@ -3,6 +3,7 @@ services:
     build: .
     image: jhawk7/go-pi-irrigation
     restart: always
+    platform: linux/arm/v6
     env_file:
       - .env
     devices:

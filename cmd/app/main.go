@@ -11,7 +11,6 @@ import (
 	"github.com/jhawk7/go-pi-irrigation/pkg/controller"
 	"github.com/jhawk7/go-pi-irrigation/pkg/pump"
 
-	log "github.com/sirupsen/logrus"
 	rpio "github.com/stianeikeland/go-rpio/v4"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/metric"
@@ -27,12 +26,6 @@ const (
 
 var plantController1 *controller.Controller
 var plantController2 *controller.Controller
-
-func initTelemetry() {
-	if otlpErr := opentel.InitOpentelProviders; otlpErr != nil {
-		common.ErrorHandler(fmt.Errorf("failed to init otlp providers; [error: %v]", otlpErr), true)
-	}
-}
 
 func main() {
 	// Open and map memory to access gpio, check for errors
@@ -78,7 +71,10 @@ func main() {
 	}
 
 	// Init opentelemetry metric and trace providers
-	initTelemetry()
+	if opentelErr := opentel.InitOpentelProviders; opentelErr() != nil {
+		common.ErrorHandler(fmt.Errorf("failed to init opentel providers; [error: %v]", opentelErr()), true)
+	}
+
 	defer func() {
 		shutdownErr := opentel.ShutdownOpentelProviders()
 		common.ErrorHandler(shutdownErr, true)
@@ -104,11 +100,12 @@ func gaugeMoistureLevel() {
 }
 
 var moistureCallback = func(ctx context.Context, result metric.Float64ObserverResult) {
-	log.Info("observing moisture levels")
+	common.LogInfo("observing moisture levels")
 	//moistureReading1, moistureReading2 := readMoistureLevel()
 	result.Observe(float64(plantController1.LatestReading), attribute.String("read.type", "percentage"), attribute.String("controller.name", plantController1.Name))
 	result.Observe(float64(plantController2.LatestReading), attribute.String("read.type", "percentage"), attribute.String("controller.name", plantController2.Name))
-	time.Sleep(time.Hour)
+	common.LogInfo(fmt.Sprintf("Plant1 Reading: %v%%\nPlant2 Reading: %v%%", float64(plantController1.LatestReading), float64(plantController2.LatestReading)))
+	time.Sleep(time.Minute * 30)
 }
 
 // func readMoistureLevel() (float64, float64) {

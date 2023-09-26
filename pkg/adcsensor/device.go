@@ -22,8 +22,8 @@ import (
 const (
 	i2cBus       string  = "1"   // /i2c/dev/1 channel of ADC connected via i2c
 	i2cAddr      uint16  = 0x49  // I2C address of the ADC device
-	airVoltage   float32 = 5868  //voltage reading of sensor in air
-	waterVoltage float32 = 13560 //voltage reading of sensor in water
+	waterVoltage float32 = 5868  //voltage reading of sensor in water
+	airVoltage   float32 = 13560 //voltage reading of sensor in air
 
 	Channel0 ads1x15.Channel = ads1x15.Channel0
 	Channel1 ads1x15.Channel = ads1x15.Channel1

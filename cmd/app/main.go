@@ -26,6 +26,8 @@ const (
 
 var plantController1 *controller.Controller
 var plantController2 *controller.Controller
+var checkDelay = common.GetenvInt("CHECK_DELAY_SECONDS")
+var callbackDelay = common.GetenvInt("CALLBACK_DELAY_SECONDS")
 
 func main() {
 	// Open and map memory to access gpio, check for errors
@@ -88,7 +90,7 @@ func main() {
 	for {
 		plantController1.CheckMoistureLv()
 		plantController2.CheckMoistureLv()
-		time.Sleep(time.Hour)
+		time.Sleep(time.Second * time.Duration(checkDelay))
 	}
 }
 
@@ -105,7 +107,7 @@ var moistureCallback = func(ctx context.Context, result metric.Float64ObserverRe
 	result.Observe(float64(plantController1.LatestReading), attribute.String("read.type", "percentage"), attribute.String("controller.name", plantController1.Name))
 	result.Observe(float64(plantController2.LatestReading), attribute.String("read.type", "percentage"), attribute.String("controller.name", plantController2.Name))
 	common.LogInfo(fmt.Sprintf("Plant1 Reading: %v%%\nPlant2 Reading: %v%%", float64(plantController1.LatestReading), float64(plantController2.LatestReading)))
-	time.Sleep(time.Minute * 30)
+	time.Sleep(time.Minute * time.Duration(callbackDelay))
 }
 
 // func readMoistureLevel() (float64, float64) {

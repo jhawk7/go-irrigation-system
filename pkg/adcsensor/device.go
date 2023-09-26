@@ -83,9 +83,10 @@ func (sensor *ADCSensor) ReadMoistureValue(channel ads1x15.Channel) (moisturePer
 	}
 	//defer pin.Halt() // doesn't close pin
 
+	common.LogInfo(fmt.Sprintf("reading channel %v", channel))
 	readSample, readErr := pin.Read()
 	if readErr != nil {
-		err = fmt.Errorf("failed to get reading from pin; %v", readErr)
+		err = fmt.Errorf("failed to get reading from pin for channel %v; %v", channel, readErr)
 		return
 	}
 	rawReading := readSample.Raw

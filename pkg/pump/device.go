@@ -1,4 +1,4 @@
-package water_pump
+package pump
 
 import (
 	"time"

@@ -4,15 +4,15 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/jhawk7/go-pi-irrigation/pkg/adcsensor"
 	"github.com/jhawk7/go-pi-irrigation/pkg/common"
-	"github.com/jhawk7/go-pi-irrigation/pkg/moisture_sensor"
-	"github.com/jhawk7/go-pi-irrigation/pkg/water_pump"
+	"github.com/jhawk7/go-pi-irrigation/pkg/pump"
 	"periph.io/x/devices/v3/ads1x15"
 )
 
 type Controller struct {
-	Pump                    *water_pump.WaterPumpRelay
-	Msensor                 *moisture_sensor.ADCMoistureSensor
+	Pump                    *pump.WaterPumpRelay
+	ADCSensor               *adcsensor.ADCSensor
 	IdealMoisturePercentage int
 	Threshold               int
 	Name                    string
@@ -22,7 +22,7 @@ type Controller struct {
 }
 
 func (c *Controller) CheckMoistureLv() {
-	reading, readErr := c.Msensor.ReadMoistureValue(c.Channel)
+	reading, readErr := c.ADCSensor.ReadMoistureValue(c.Channel)
 	common.ErrorHandler(readErr, false)
 
 	c.LatestReading = reading
@@ -33,7 +33,7 @@ func (c *Controller) CheckMoistureLv() {
 
 	for c.NeedsWater {
 		c.PumpWater()
-		latestReading, readErr := c.Msensor.ReadMoistureValue(c.Channel)
+		latestReading, readErr := c.ADCSensor.ReadMoistureValue(c.Channel)
 		common.ErrorHandler(readErr, true)
 		if latestReading >= float32(c.IdealMoisturePercentage) {
 			c.LatestReading = latestReading
@@ -46,7 +46,7 @@ func (c *Controller) CheckMoistureLv() {
 
 // This function will be called repeatedly in a go routine
 // func (c *Controller) PollMoistureLv() float32 {
-// 	latestReading, readErr := c.Msensor.ReadMoistureValue(c.Channel)
+// 	latestReading, readErr := c.ADCSensor.ReadMoistureValue(c.Channel)
 // 	common.ErrorHandler(readErr, true)
 // 	c.LatestReading = latestReading
 // 	return latestReading
@@ -54,7 +54,7 @@ func (c *Controller) CheckMoistureLv() {
 
 func (c *Controller) PollMoistureLv() {
 	ch := make(chan float32)
-	c.Msensor.PollMoistureValue(c.Channel, ch)
+	c.ADCSensor.PollMoistureValue(c.Channel, ch)
 	for reading := range ch {
 		c.LatestReading = reading
 	}

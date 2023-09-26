@@ -1,4 +1,4 @@
-package moisture_sensor
+package adcsensor
 
 import (
 	"fmt"
@@ -31,13 +31,13 @@ const (
 	Channel3 ads1x15.Channel = ads1x15.Channel3
 )
 
-type ADCMoistureSensor struct {
+type ADCSensor struct {
 	bus   i2c.BusCloser
 	ADC   *ads1x15.Dev
 	cache map[string]ads1x15.PinADC //channel-freq string to pin
 }
 
-func InitMoistureSensor() (moistureSensor *ADCMoistureSensor, err error) {
+func InitADCSensor() (sensor *ADCSensor, err error) {
 	// Make sure periph is initialized.
 	if _, initErr := host.Init(); err != nil {
 		err = fmt.Errorf("failed to init periph pkg; %v", initErr)
@@ -58,7 +58,7 @@ func InitMoistureSensor() (moistureSensor *ADCMoistureSensor, err error) {
 		return
 	}
 
-	moistureSensor = &ADCMoistureSensor{
+	sensor = &ADCSensor{
 		bus:   bus,
 		cache: make(map[string]ads1x15.PinADC),
 		ADC:   adc,
@@ -66,8 +66,8 @@ func InitMoistureSensor() (moistureSensor *ADCMoistureSensor, err error) {
 	return
 }
 
-func (moistureSensor *ADCMoistureSensor) Close() (err error) {
-	if closeErr := moistureSensor.bus.Close(); closeErr != nil {
+func (sensor *ADCSensor) Close() (err error) {
+	if closeErr := sensor.bus.Close(); closeErr != nil {
 		err = fmt.Errorf("failed to properly close bus: %v", closeErr)
 		return
 	}
@@ -75,8 +75,8 @@ func (moistureSensor *ADCMoistureSensor) Close() (err error) {
 }
 
 // ADS1115 provides 4 channels to read values from
-func (moistureSensor *ADCMoistureSensor) ReadMoistureValue(channel ads1x15.Channel) (moisturePercentage float32, err error) {
-	pin, pinErr := moistureSensor.getPin(channel, 1*physic.Hertz)
+func (sensor *ADCSensor) ReadMoistureValue(channel ads1x15.Channel) (moisturePercentage float32, err error) {
+	pin, pinErr := sensor.getPin(channel, 1*physic.Hertz)
 	if pinErr != nil {
 		err = pinErr
 		return
@@ -94,8 +94,8 @@ func (moistureSensor *ADCMoistureSensor) ReadMoistureValue(channel ads1x15.Chann
 	return
 }
 
-func (moistureSensor *ADCMoistureSensor) PollMoistureValue(channel ads1x15.Channel, readingCh chan float32) {
-	pin, pinErr := moistureSensor.getPin(channel, 10*physic.MilliHertz)
+func (sensor *ADCSensor) PollMoistureValue(channel ads1x15.Channel, readingCh chan float32) {
+	pin, pinErr := sensor.getPin(channel, 10*physic.MilliHertz)
 	if pinErr != nil {
 		common.ErrorHandler(pinErr, true)
 	}
@@ -108,17 +108,17 @@ func (moistureSensor *ADCMoistureSensor) PollMoistureValue(channel ads1x15.Chann
 	return
 }
 
-func (moistureSensor *ADCMoistureSensor) getPin(channel ads1x15.Channel, freq physic.Frequency) (pin ads1x15.PinADC, err error) {
+func (sensor *ADCSensor) getPin(channel ads1x15.Channel, freq physic.Frequency) (pin ads1x15.PinADC, err error) {
 	key := fmt.Sprintf("%v-%v", channel, freq)
-	if p, pinExists := moistureSensor.cache[key]; pinExists {
+	if p, pinExists := sensor.cache[key]; pinExists {
 		pin = p
 	} else {
-		p, pinErr := moistureSensor.ADC.PinForChannel(channel, 5*physic.Volt, freq, ads1x15.SaveEnergy)
+		p, pinErr := sensor.ADC.PinForChannel(channel, 5*physic.Volt, freq, ads1x15.SaveEnergy)
 		if pinErr != nil {
 			err = fmt.Errorf("failed create pin for channel; %v", pinErr)
 			return
 		}
-		moistureSensor.cache[key] = p
+		sensor.cache[key] = p
 		common.LogInfo(fmt.Sprintf("caching mSensor pin for key: %v", key))
 		pin = p
 	}

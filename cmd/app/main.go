@@ -6,10 +6,10 @@ import (
 	"time"
 
 	"github.com/jhawk7/go-opentel/opentel"
+	"github.com/jhawk7/go-pi-irrigation/pkg/adcsensor"
 	"github.com/jhawk7/go-pi-irrigation/pkg/common"
 	"github.com/jhawk7/go-pi-irrigation/pkg/controller"
-	"github.com/jhawk7/go-pi-irrigation/pkg/moisture_sensor"
-	"github.com/jhawk7/go-pi-irrigation/pkg/water_pump"
+	"github.com/jhawk7/go-pi-irrigation/pkg/pump"
 
 	log "github.com/sirupsen/logrus"
 	rpio "github.com/stianeikeland/go-rpio/v4"
@@ -17,7 +17,14 @@ import (
 	"go.opentelemetry.io/otel/metric"
 )
 
-var METER_NAME string = "pi-irrigation"
+const (
+	meterName         = "pi-irrigation"
+	waterPump1        = 24
+	waterPump2        = 15
+	idealMoisture     = 90
+	moistureThreshold = 22
+)
+
 var plantController1 *controller.Controller
 var plantController2 *controller.Controller
 
@@ -37,37 +44,37 @@ func main() {
 	defer rpio.Close()
 
 	// Init moisture sensor ADC via I2C device
-	mSensor, mErr := moisture_sensor.InitMoistureSensor()
+	adcSensor, mErr := adcsensor.InitADCSensor()
 	common.ErrorHandler(mErr, true)
 
 	defer func() {
-		err := mSensor.Close()
+		err := adcSensor.Close()
 		common.ErrorHandler(err, true)
 	}()
 
 	// Init water pumps
-	pump1 := water_pump.InitWaterPumpRelay(24)
-	pump2 := water_pump.InitWaterPumpRelay(15)
+	pump1 := pump.InitWaterPumpRelay(waterPump1)
+	pump2 := pump.InitWaterPumpRelay(waterPump2)
 
 	// Init controllers
 	plantController1 = &controller.Controller{
 		Pump:                    pump1,
-		Msensor:                 mSensor,
-		IdealMoisturePercentage: 90,
-		Threshold:               22,
+		ADCSensor:               adcSensor,
+		IdealMoisturePercentage: idealMoisture,
+		Threshold:               moistureThreshold,
 		Name:                    "plant1",
 		NeedsWater:              false,
-		Channel:                 moisture_sensor.Channel0,
+		Channel:                 adcsensor.Channel0,
 	}
 
 	plantController2 = &controller.Controller{
 		Pump:                    pump2,
-		Msensor:                 mSensor,
-		IdealMoisturePercentage: 90,
-		Threshold:               22,
+		ADCSensor:               adcSensor,
+		IdealMoisturePercentage: idealMoisture,
+		Threshold:               moistureThreshold,
 		Name:                    "plant2",
 		NeedsWater:              false,
-		Channel:                 moisture_sensor.Channel1,
+		Channel:                 adcsensor.Channel1,
 	}
 
 	// Init opentelemetry metric and trace providers
@@ -91,9 +98,9 @@ func main() {
 
 func gaugeMoistureLevel() {
 	// creates meter and gauge observer from opentel meter provider
-	moistureReader := opentel.GetMeterProvider().Meter(METER_NAME)
+	moistureReader := opentel.GetMeterProvider().Meter(meterName)
 	// gauge observer continuously polls data from callback
-	moistureReader.NewFloat64GaugeObserver(fmt.Sprintf("%v.read", METER_NAME), moistureCallback)
+	moistureReader.NewFloat64GaugeObserver(fmt.Sprintf("%v.read", meterName), moistureCallback)
 }
 
 var moistureCallback = func(ctx context.Context, result metric.Float64ObserverResult) {

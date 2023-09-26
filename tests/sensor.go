@@ -22,8 +22,8 @@
 // const (
 // 	i2cBus       string  = "1"   // /i2c/dev/1 channel of ADC connected via i2c
 // 	i2cAddr      uint16  = 0x49  // I2C address of the ADC device
-// 	airVoltage   float32 = 5868  //voltage reading of sensor in air
-// 	waterVoltage float32 = 13560 //voltage reading of sensor in water
+// 	airVoltage   float32 = 6332  //voltage reading of sensor in air
+// 	waterVoltage float32 = 13433 //voltage reading of sensor in water
 
 // 	Channel0 ads1x15.Channel = ads1x15.Channel0
 // 	Channel1 ads1x15.Channel = ads1x15.Channel1
@@ -76,7 +76,7 @@
 // }
 
 // // ADS1115 provides 4 channels to read values from
-// func (moistureSensor *ADCMoistureSensor) ReadMoistureValue(channel ads1x15.Channel) (moisturePercentage float32, err error) {
+// func (moistureSensor *ADCMoistureSensor) ReadMoistureValue(channel ads1x15.Channel) (rawReading int32, moisturePercentage float32, err error) {
 // 	pin, pinErr := moistureSensor.getPin(channel, 1*physic.Hertz)
 // 	if pinErr != nil {
 // 		err = pinErr
@@ -89,7 +89,7 @@
 // 		err = fmt.Errorf("failed to get reading from pin; %v", readErr)
 // 		return
 // 	}
-// 	rawReading := readSample.Raw
+// 	rawReading = readSample.Raw
 // 	moisturePercentage = mapReading(rawReading)
 // 	//moisturePercentage = float32(rawReading)
 // 	time.Sleep(time.Millisecond * 500)
@@ -149,17 +149,17 @@
 // 	}()
 
 // 	for i := 0; i < 10; i++ {
-// 		reading0, rErr0 := mSensor.ReadMoistureValue(Channel0)
+// 		raw0, reading0, rErr0 := mSensor.ReadMoistureValue(Channel0)
 // 		if rErr0 != nil {
 // 			log.Fatal(rErr0)
 // 		}
-// 		fmt.Printf("Reading from channel 0: %v\n", reading0)
+// 		fmt.Printf("Reading from channel 0 [raw: %.2d] [reading: %.2f]\n", raw0, reading0)
 
-// 		reading1, rErr1 := mSensor.ReadMoistureValue(Channel1)
+// 		raw1, reading1, rErr1 := mSensor.ReadMoistureValue(Channel1)
 // 		if rErr1 != nil {
 // 			log.Fatal(rErr1)
 // 		}
-// 		fmt.Printf("Reading from channel 1: %v\n", reading1)
+// 		fmt.Printf("Reading from channel 1 [raw: %.2d] [reading: %.2f]\n", raw1, reading1)
 // 	}
 
 // 	// ch0 := make(chan float32)

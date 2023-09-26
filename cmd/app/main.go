@@ -107,7 +107,7 @@ var moistureCallback = func(ctx context.Context, result metric.Float64ObserverRe
 	result.Observe(float64(plantController1.LatestReading), attribute.String("read.type", "percentage"), attribute.String("controller.name", plantController1.Name))
 	result.Observe(float64(plantController2.LatestReading), attribute.String("read.type", "percentage"), attribute.String("controller.name", plantController2.Name))
 	common.LogInfo(fmt.Sprintf("Plant1 Reading: %.2f%% Plant2 Reading: %.2f%%", float64(plantController1.LatestReading), float64(plantController2.LatestReading)))
-	time.Sleep(time.Minute * time.Duration(callbackDelay))
+	time.Sleep(time.Second * time.Duration(callbackDelay))
 }
 
 // func readMoistureLevel() (float64, float64) {

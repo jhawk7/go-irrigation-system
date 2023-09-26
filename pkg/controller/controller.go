@@ -13,7 +13,7 @@ import (
 type Controller struct {
 	Pump                    *pump.WaterPumpRelay
 	ADCSensor               *adcsensor.ADCSensor
-	IdealMoisturePercentage int
+	IdealMoisturePercentage float32
 	Threshold               int
 	Name                    string
 	NeedsWater              bool
@@ -29,19 +29,23 @@ func (c *Controller) CheckMoistureLv() {
 	if c.LatestReading <= float32(c.Threshold) {
 		c.NeedsWater = true
 		common.LogInfo(fmt.Sprintf("%v needs water [reading: %v]", c.Name, c.LatestReading))
-	}
-
-	for c.NeedsWater {
 		c.PumpWater()
-		latestReading, readErr := c.ADCSensor.ReadMoistureValue(c.Channel)
-		common.ErrorHandler(readErr, true)
-		if latestReading >= float32(c.IdealMoisturePercentage) {
-			c.LatestReading = latestReading
-			c.NeedsWater = false
-		}
 	}
 
 	common.LogInfo(fmt.Sprintf("%v latest reading: %v", c.Name, c.LatestReading))
+}
+
+func (c *Controller) PumpWater() {
+	for c.LatestReading < float32(c.IdealMoisturePercentage) {
+		common.LogInfo(fmt.Sprintf("pumping water for %v", c.Name))
+		c.Pump.Release()
+		time.Sleep(3 * time.Second)
+
+		reading, readErr := c.ADCSensor.ReadMoistureValue(c.Channel)
+		common.ErrorHandler(readErr, true)
+		c.LatestReading = reading
+	}
+	c.NeedsWater = false
 }
 
 // This function will be called repeatedly in a go routine
@@ -58,10 +62,4 @@ func (c *Controller) PollMoistureLv() {
 	for reading := range ch {
 		c.LatestReading = reading
 	}
-}
-
-func (c *Controller) PumpWater() {
-	common.LogInfo(fmt.Sprintf("pumping water for %v", c.Name))
-	c.Pump.Release()
-	time.Sleep(3 * time.Second)
 }

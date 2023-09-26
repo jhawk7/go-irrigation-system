@@ -44,6 +44,7 @@ func (c *Controller) pumpWater() {
 		reading, readErr := c.ADCSensor.ReadMoistureValue(c.Channel)
 		common.ErrorHandler(readErr, true)
 		c.LatestReading = reading
+		common.LogInfo(fmt.Sprintf("%v [current: %v] [ideal: %v]", c.Name, c.LatestReading, c.IdealMoisturePercentage))
 	}
 	c.NeedsWater = false
 }

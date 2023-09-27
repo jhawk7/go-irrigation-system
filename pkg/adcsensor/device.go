@@ -34,6 +34,7 @@ const (
 type ADCSensor struct {
 	bus   i2c.BusCloser
 	ADC   *ads1x15.Dev
+	freq  physic.Frequency
 	cache map[string]ads1x15.PinADC //channel-freq string to pin
 }
 
@@ -62,6 +63,7 @@ func InitADCSensor() (sensor *ADCSensor, err error) {
 		bus:   bus,
 		cache: make(map[string]ads1x15.PinADC),
 		ADC:   adc,
+		freq:  physic.Frequency(common.GetenvInt("ADC_SAMPLE_FREQ")),
 	}
 	return
 }
@@ -83,7 +85,7 @@ func (sensor *ADCSensor) Close() (busErr error, adcErr error) {
 . Misreads/duplicate reads can occur if function is called faster than the sampling set sampling rate of pin
 */
 func (sensor *ADCSensor) ReadMoistureValue(channel ads1x15.Channel) (moisturePercentage float32, err error) {
-	pin, pinErr := sensor.getPin(channel, 50*physic.Hertz)
+	pin, pinErr := sensor.getPin(channel)
 	if pinErr != nil {
 		err = pinErr
 		return
@@ -102,12 +104,12 @@ func (sensor *ADCSensor) ReadMoistureValue(channel ads1x15.Channel) (moisturePer
 	return
 }
 
-func (sensor *ADCSensor) getPin(channel ads1x15.Channel, freq physic.Frequency) (pin ads1x15.PinADC, err error) {
-	key := fmt.Sprintf("%v-%v", channel, freq)
+func (sensor *ADCSensor) getPin(channel ads1x15.Channel) (pin ads1x15.PinADC, err error) {
+	key := fmt.Sprintf("%v-%v", channel, sensor.freq)
 	if p, pinExists := sensor.cache[key]; pinExists {
 		pin = p
 	} else {
-		p, pinErr := sensor.ADC.PinForChannel(channel, 5*physic.Volt, freq, ads1x15.BestQuality)
+		p, pinErr := sensor.ADC.PinForChannel(channel, 5*physic.Volt, sensor.freq, ads1x15.BestQuality)
 		if pinErr != nil {
 			err = fmt.Errorf("failed create pin for channel; %v", pinErr)
 			return
@@ -133,7 +135,7 @@ Polling the channel continously will only work reliably for continously reading 
 The ADC needs time to switch channels and process voltage.
 */
 func (sensor *ADCSensor) PollMoistureValue(channel ads1x15.Channel, readingCh chan float32) {
-	pin, pinErr := sensor.getPin(channel, 10*physic.MilliHertz)
+	pin, pinErr := sensor.getPin(channel)
 	if pinErr != nil {
 		common.ErrorHandler(pinErr, true)
 	}

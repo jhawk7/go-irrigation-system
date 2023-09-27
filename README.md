@@ -12,3 +12,4 @@ Plant Irrigation System built with Raspberry Pi using Go
 * `OTEL_EXPORTER_OTLP_ENDPOINT` - IP:PORT for running opentelemetry collector instance (defaults to  `0.0.0.0:4317`)
 * `CHECK_DELAY_SECONDS` - time in seconds to delay moisture reads from ADC moisture sensor
 * `CALLBACK_DELAY_SECONDS` - time in seconds to delay continous Opentel Gauge Observer function callbacks
+* `ADC_SAMPLE_FREQ` - sampling frequency in hz (cycles/second) for ADC (max is 860 hz `https://www.ti.com/product/ADS1115`)

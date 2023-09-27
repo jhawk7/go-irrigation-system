@@ -35,6 +35,7 @@ type ADCSensor struct {
 	bus   i2c.BusCloser
 	ADC   *ads1x15.Dev
 	freq  physic.Frequency
+	delay time.Duration
 	cache map[string]ads1x15.PinADC //channel-freq string to pin
 }
 
@@ -64,6 +65,7 @@ func InitADCSensor() (sensor *ADCSensor, err error) {
 		cache: make(map[string]ads1x15.PinADC),
 		ADC:   adc,
 		freq:  physic.Frequency(common.GetenvInt("ADC_SAMPLE_FREQ")),
+		delay: time.Duration(common.GetenvInt("CHECK_DELAY_SECONDS")),
 	}
 	return
 }
@@ -100,7 +102,7 @@ func (sensor *ADCSensor) ReadMoistureValue(channel ads1x15.Channel) (moisturePer
 	}
 	rawReading := readSample.Raw
 	moisturePercentage = mapReading(rawReading)
-	time.Sleep(time.Millisecond * 500) //wait time between channel reads
+	time.Sleep(time.Second * sensor.delay) //wait time between channel reads
 	return
 }
 

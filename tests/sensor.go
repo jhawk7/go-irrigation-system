@@ -22,8 +22,8 @@
 // const (
 // 	i2cBus       string  = "1"   // /i2c/dev/1 channel of ADC connected via i2c
 // 	i2cAddr      uint16  = 0x49  // I2C address of the ADC device
-// 	airVoltage   float32 = 6332  //voltage reading of sensor in air
-// 	waterVoltage float32 = 13433 //voltage reading of sensor in water
+// 	waterVoltage float32 = 5868  //voltage reading of sensor in water
+// 	airVoltage   float32 = 13560 //voltage reading of sensor in air
 
 // 	Channel0 ads1x15.Channel = ads1x15.Channel0
 // 	Channel1 ads1x15.Channel = ads1x15.Channel1
@@ -77,7 +77,7 @@
 
 // // ADS1115 provides 4 channels to read values from
 // func (moistureSensor *ADCMoistureSensor) ReadMoistureValue(channel ads1x15.Channel) (rawReading int32, moisturePercentage float32, err error) {
-// 	pin, pinErr := moistureSensor.getPin(channel, 1*physic.Hertz)
+// 	pin, pinErr := moistureSensor.getPin(channel, 50*physic.Hertz)
 // 	if pinErr != nil {
 // 		err = pinErr
 // 		return
@@ -91,22 +91,7 @@
 // 	}
 // 	rawReading = readSample.Raw
 // 	moisturePercentage = mapReading(rawReading)
-// 	//moisturePercentage = float32(rawReading)
 // 	time.Sleep(time.Millisecond * 500)
-// 	return
-// }
-
-// func (moistureSensor *ADCMoistureSensor) PollMoistureValue(channel ads1x15.Channel, readingCh chan float32) {
-// 	pin, pinErr := moistureSensor.getPin(channel, 2*physic.Hertz)
-// 	if pinErr != nil {
-// 		log.Fatal(pinErr)
-// 	}
-// 	defer pin.Halt() // doesn't close pin
-
-// 	analogCh := pin.ReadContinuous()
-// 	for analogRead := range analogCh {
-// 		readingCh <- mapReading(analogRead.Raw)
-// 	}
 // 	return
 // }
 
@@ -133,6 +118,23 @@
 // func mapReading(rawReading int32) float32 {
 // 	moisturePercentage := (float32(rawReading)-airVoltage)*(100-0)/(waterVoltage-airVoltage) + 0
 // 	return moisturePercentage
+// }
+
+// /*
+// Reliable for continoulsy reading 1/4 pins
+// */
+// func (moistureSensor *ADCMoistureSensor) PollMoistureValue(channel ads1x15.Channel, readingCh chan float32) {
+// 	pin, pinErr := moistureSensor.getPin(channel, 2*physic.Hertz)
+// 	if pinErr != nil {
+// 		log.Fatal(pinErr)
+// 	}
+// 	defer pin.Halt() // doesn't close pin
+
+// 	analogCh := pin.ReadContinuous()
+// 	for analogRead := range analogCh {
+// 		readingCh <- mapReading(analogRead.Raw)
+// 	}
+// 	return
 // }
 
 // func main() {
@@ -162,11 +164,14 @@
 // 		fmt.Printf("Reading from channel 1 [raw: %.2d] [reading: %.2f]\n", raw1, reading1)
 // 	}
 
-// 	// ch0 := make(chan float32)
-// 	// go mSensor.PollMoistureValue(Channel0, ch0)
+// 	fmt.Println("polling continously..")
+// 	ch0 := make(chan float32)
+// 	//ch1 := make(chan float32)
+// 	go mSensor.PollMoistureValue(Channel0, ch0)
+// 	//go mSensor.PollMoistureValue(Channel1, ch1)
 
-// 	// for read := range ch0 {
-// 	// 	fmt.Printf("Polled reading from ch0: %v\n", read)
-// 	// 	time.Sleep(time.Second)
-// 	// }
+// 	for read := range ch0 {
+// 		fmt.Printf("Polled reading from ch0: %v\n", read)
+// 		time.Sleep(time.Second)
+// 	}
 // }

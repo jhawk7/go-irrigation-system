@@ -66,17 +66,24 @@ func InitADCSensor() (sensor *ADCSensor, err error) {
 	return
 }
 
-func (sensor *ADCSensor) Close() (err error) {
+func (sensor *ADCSensor) Close() (busErr error, adcErr error) {
 	if closeErr := sensor.bus.Close(); closeErr != nil {
-		err = fmt.Errorf("failed to properly close bus: %v", closeErr)
-		return
+		busErr = fmt.Errorf("failed to properly close bus: %v", closeErr)
+	}
+
+	if haltErr := sensor.ADC.Halt(); haltErr != nil {
+		adcErr = fmt.Errorf("failed to halt adc: %v", haltErr)
 	}
 	return
 }
 
-// ADS1115 provides 4 channels to read values from
+/*
+. ADS1115 provides 4 channels to read values from
+. The max freq for a pin is 860Hz or .86ksps per https://www.ti.com/product/ADS1115
+. Misreads/duplicate reads can occur if function is called faster than the sampling set sampling rate of pin
+*/
 func (sensor *ADCSensor) ReadMoistureValue(channel ads1x15.Channel) (moisturePercentage float32, err error) {
-	pin, pinErr := sensor.getPin(channel, 1*physic.Hertz)
+	pin, pinErr := sensor.getPin(channel, 50*physic.Hertz)
 	if pinErr != nil {
 		err = pinErr
 		return
@@ -95,26 +102,12 @@ func (sensor *ADCSensor) ReadMoistureValue(channel ads1x15.Channel) (moisturePer
 	return
 }
 
-func (sensor *ADCSensor) PollMoistureValue(channel ads1x15.Channel, readingCh chan float32) {
-	pin, pinErr := sensor.getPin(channel, 10*physic.MilliHertz)
-	if pinErr != nil {
-		common.ErrorHandler(pinErr, true)
-	}
-	defer pin.Halt() // doesn't close pin
-
-	analogCh := pin.ReadContinuous()
-	for analogRead := range analogCh {
-		readingCh <- mapReading(analogRead.Raw)
-	}
-	return
-}
-
 func (sensor *ADCSensor) getPin(channel ads1x15.Channel, freq physic.Frequency) (pin ads1x15.PinADC, err error) {
 	key := fmt.Sprintf("%v-%v", channel, freq)
 	if p, pinExists := sensor.cache[key]; pinExists {
 		pin = p
 	} else {
-		p, pinErr := sensor.ADC.PinForChannel(channel, 5*physic.Volt, freq, ads1x15.SaveEnergy)
+		p, pinErr := sensor.ADC.PinForChannel(channel, 5*physic.Volt, freq, ads1x15.BestQuality)
 		if pinErr != nil {
 			err = fmt.Errorf("failed create pin for channel; %v", pinErr)
 			return
@@ -133,4 +126,21 @@ func (sensor *ADCSensor) getPin(channel ads1x15.Channel, freq physic.Frequency) 
 func mapReading(rawReading int32) float32 {
 	moisturePercentage := (float32(rawReading)-airVoltage)*(100-0)/(waterVoltage-airVoltage) + 0
 	return moisturePercentage
+}
+
+/*
+Polling the channel continously will only work reliably for continously reading 1/4 pins.
+The ADC needs time to switch channels and process voltage.
+*/
+func (sensor *ADCSensor) PollMoistureValue(channel ads1x15.Channel, readingCh chan float32) {
+	pin, pinErr := sensor.getPin(channel, 10*physic.MilliHertz)
+	if pinErr != nil {
+		common.ErrorHandler(pinErr, true)
+	}
+	defer pin.Halt() // doesn't close pin
+
+	analogCh := pin.ReadContinuous()
+	for analogRead := range analogCh {
+		readingCh <- mapReading(analogRead.Raw)
+	}
 }

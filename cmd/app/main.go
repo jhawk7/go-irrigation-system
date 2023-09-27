@@ -43,8 +43,9 @@ func main() {
 	common.ErrorHandler(mErr, true)
 
 	defer func() {
-		err := adcSensor.Close()
-		common.ErrorHandler(err, true)
+		busErr, haltErr := adcSensor.Close()
+		common.ErrorHandler(busErr, true)
+		common.ErrorHandler(haltErr, true)
 	}()
 
 	// Init water pumps
@@ -85,7 +86,7 @@ func main() {
 	// Continuously update latest moisture reading
 	// go plantController1.PollMoistureLv()
 	// go plantController2.PollMoistureLv()
-	//go gaugeMoistureLevel()
+	go gaugeMoistureLevel()
 
 	for {
 		plantController1.CheckMoistureLv()

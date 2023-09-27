@@ -65,7 +65,7 @@ func InitADCSensor() (sensor *ADCSensor, err error) {
 		cache: make(map[string]ads1x15.PinADC),
 		ADC:   adc,
 		freq:  physic.Frequency(common.GetenvInt("ADC_SAMPLE_FREQ")),
-		delay: time.Duration(common.GetenvInt("CHECK_DELAY_SECONDS")),
+		delay: time.Duration(common.GetenvInt("ADC_READ_DELAY")),
 	}
 	return
 }

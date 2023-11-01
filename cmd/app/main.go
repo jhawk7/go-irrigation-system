@@ -90,7 +90,7 @@ func main() {
 
 	for {
 		plantController1.CheckMoistureLv()
-		time.Sleep(time.Second)
+		time.Sleep(time.Second * time.Duration(checkDelay))
 		plantController2.CheckMoistureLv()
 		time.Sleep(time.Second * time.Duration(checkDelay))
 	}

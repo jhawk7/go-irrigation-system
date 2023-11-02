@@ -42,8 +42,6 @@ pipeline {
         container(name: 'kaniko', shell: '/busybox/sh') {
           withEnv(['PATH+EXTRA=/busybox:/kaniko']) {
             sh '''#!/busybox/sh
-            pwd
-            ls
             /kaniko/executor --dockerfile=Dockerfile \
             --context=`pwd` \
             --cache=true \

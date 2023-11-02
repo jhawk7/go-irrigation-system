@@ -1,4 +1,4 @@
-module github.com/jhawk7/go-pi-irrigation
+module github.com/jhawk7/go-irrigation
 
 go 1.20
 

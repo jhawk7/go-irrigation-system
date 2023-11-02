@@ -48,7 +48,7 @@ pipeline {
             --context=`pwd` \
             --cache=true \
             --custom-platform=linux/arm/v6 \
-            --destination=jhawk7/go-pi-irrigation:latest'''
+            --destination=jhawk7/go-irrigation:latest'''
           }
         }   
       }

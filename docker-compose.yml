@@ -1,7 +1,7 @@
 services:
   go-pi-irrigation:
     build: .
-    image: jhawk7/go-pi-irrigation
+    image: jhawk7/go-irrigation
     restart: always
     platform: linux/arm/v6
     env_file:

@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/jhawk7/go-pi-irrigation/pkg/adcsensor"
-	"github.com/jhawk7/go-pi-irrigation/pkg/common"
-	"github.com/jhawk7/go-pi-irrigation/pkg/pump"
+	"github.com/jhawk7/go-irrigation/pkg/adcsensor"
+	"github.com/jhawk7/go-irrigation/pkg/common"
+	"github.com/jhawk7/go-irrigation/pkg/pump"
 	"periph.io/x/devices/v3/ads1x15"
 )
 

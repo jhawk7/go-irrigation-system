@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/jhawk7/go-pi-irrigation/pkg/common"
+	"github.com/jhawk7/go-irrigation/pkg/common"
 
 	"periph.io/x/conn/v3/i2c"
 	"periph.io/x/conn/v3/i2c/i2creg"

@@ -5,11 +5,11 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/jhawk7/go-irrigation/pkg/adcsensor"
+	"github.com/jhawk7/go-irrigation/pkg/common"
+	"github.com/jhawk7/go-irrigation/pkg/controller"
+	"github.com/jhawk7/go-irrigation/pkg/pump"
 	"github.com/jhawk7/go-opentel/opentel"
-	"github.com/jhawk7/go-pi-irrigation/pkg/adcsensor"
-	"github.com/jhawk7/go-pi-irrigation/pkg/common"
-	"github.com/jhawk7/go-pi-irrigation/pkg/controller"
-	"github.com/jhawk7/go-pi-irrigation/pkg/pump"
 
 	rpio "github.com/stianeikeland/go-rpio/v4"
 	"go.opentelemetry.io/otel/attribute"

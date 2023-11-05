@@ -20,7 +20,7 @@ const (
 	meterName         = "rpi-irrigation"
 	waterPump1        = 24
 	waterPump2        = 15
-	idealMoisture     = float32(90)
+	idealMoisture     = float32(80)
 	moistureThreshold = float32(40)
 )
 

@@ -21,7 +21,7 @@ const (
 	waterPump1        = 24
 	waterPump2        = 15
 	idealMoisture     = float32(90)
-	moistureThreshold = float32(22)
+	moistureThreshold = float32(40)
 )
 
 var plantController1 *controller.Controller

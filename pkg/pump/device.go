@@ -15,12 +15,13 @@ func InitWaterPumpRelay(pin int) *WaterPumpRelay {
 		pin: rpio.Pin(pin),
 	}
 	w.pin.Output()
+	w.pin.High()
 	return &w
 }
 
 // Songle 2-Channel Relay uses active low input pins (activates relay on low voltage)
 func (w *WaterPumpRelay) Release() {
 	w.pin.Low()
-	time.Sleep(time.Second * 3)
+	time.Sleep(time.Second * 4)
 	w.pin.High()
 }

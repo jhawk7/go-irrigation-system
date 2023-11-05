@@ -39,7 +39,7 @@ func (c *Controller) pumpWater() {
 	for c.LatestReading < float32(c.IdealMoisturePercentage) {
 		common.LogInfo(fmt.Sprintf("pumping water for %v", c.Name))
 		c.Pump.Release()
-		time.Sleep(3 * time.Second)
+		time.Sleep(5 * time.Second)
 
 		reading, readErr := c.ADCSensor.ReadMoistureValue(c.Channel)
 		common.ErrorHandler(readErr, true)

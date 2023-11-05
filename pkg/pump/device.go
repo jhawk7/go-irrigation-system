@@ -15,7 +15,6 @@ func InitWaterPumpRelay(pin int) *WaterPumpRelay {
 		pin: rpio.Pin(pin),
 	}
 	w.pin.Output()
-	w.pin.High()
 	return &w
 }
 
